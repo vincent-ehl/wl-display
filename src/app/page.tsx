@@ -1,23 +1,27 @@
 import { DeparturesView } from "@/components/departures/departures";
+import { VEHICLE_TYPES } from "@/singletons/monitor.singleton";
 
 export default function Home() {
   return (
-    <main className="p-5 grid grid-rows-2 grid-flow-col gap-2">
-      <div className="border-4 border-u1-red">
-        <div>Taborstraße U</div>
-        <DeparturesView diva="60201891" />
+    <main className="p-5 grid grid-cols-2 gap-2">
+      <div className="border-4 border-u1-red col-span-2">
+        <DeparturesView
+          diva="60201891"
+          types={[VEHICLE_TYPES.Enum.ptMetro, VEHICLE_TYPES.Enum.ptTram]}
+        />
       </div>
       <div className="border-4 border-u2-purple">
-        <div>Nestroyplatz</div>
-        <div>
-          <div>U2</div>
-        </div>
+        <DeparturesView
+          diva="60200916"
+          types={[VEHICLE_TYPES.Enum.ptMetro, VEHICLE_TYPES.Enum.ptTram]}
+        />
       </div>
       <div className="border-4 border-u4-green">
-        <div>Schottenring</div>
-        <div>
-          <div>U4</div>
-        </div>
+        <DeparturesView
+          diva="60201182"
+          types={[VEHICLE_TYPES.Enum.ptMetro]}
+          lineNames={["U4"]}
+        />
       </div>
     </main>
   );

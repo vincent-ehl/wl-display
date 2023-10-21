@@ -4,6 +4,10 @@ import { dummyResponse } from "@/global";
 
 const DIRECTIONS = z.enum(["H", "R"]);
 
+export const VEHICLE_TYPES = z.enum(["ptTram", "ptBusCity", "ptMetro"]);
+
+export type VEHICLE_TYPES = z.infer<typeof VEHICLE_TYPES>;
+
 const MonitorResponseSchema = z.object({
   data: z.object({
     monitors: z.array(
@@ -19,10 +23,23 @@ const MonitorResponseSchema = z.object({
             name: z.string(),
             towards: z.string(),
             barrierFree: z.boolean(),
-            departureTime: z.object({
-              countdown: z.number(),
+            departures: z.object({
+              departure: z
+                .object({
+                  departureTime: z.object({
+                    countdown: z.number(),
+                  }),
+                  vehicle: z
+                    .object({
+                      towards: z.string(),
+                      barrierFree: z.boolean(),
+                    })
+                    .optional(),
+                })
+                .array(),
             }),
             direction: DIRECTIONS,
+            type: VEHICLE_TYPES,
           })
         ),
       })
@@ -34,7 +51,7 @@ const MonitorResponseSchema = z.object({
   }),
 });
 
-type MonitorResponse = z.infer<typeof MonitorResponseSchema>;
+export type MonitorResponse = z.infer<typeof MonitorResponseSchema>;
 
 /**
  * Get Monitor data as returned by the Wiener Linien API
@@ -71,6 +88,7 @@ const StopSchema = z.object({
     z.string(),
     z.object({
       directions: DirectionsSchema,
+      type: VEHICLE_TYPES,
     })
   ),
 });
@@ -84,28 +102,71 @@ export type Departures = z.infer<typeof DeparturesSchema>;
 export const transformMonitorToDepartures = async (
   monitors: MonitorResponse
 ): Promise<Departures | undefined> => {
-  const departures: Departures = new Map();
+  const departures: Map<string, any> = new Map();
 
   monitors?.data.monitors.forEach((monitor) => {
-    const locationName = monitor.locationStop.properties.name;
-    if (departures.has(locationName)) {
-      monitor.lines.forEach((line) => {
-        const lines = departures.get(locationName)?.lines;
-        if (lines?.has(line.name)) {
-          const directions = lines.get(line.name)?.directions;
-          if (directions?.has(line.direction)) {
-            directions.get(line.direction)?.push({
-              towards: line.towards,
-              countdown: line.departureTime.countdown,
-              barrierFree: line.barrierFree,
-            });
-          }
+    const stopName = monitor.locationStop.properties.name;
+
+    monitor.lines.forEach((line) => {
+      line.departures.departure.forEach((departure) => {
+        if (!departures.has(stopName)) {
+          departures.set(stopName, {
+            title: monitor.locationStop.properties.title,
+            lines: new Map(),
+          });
         }
+
+        const lines = departures.get(stopName)?.lines;
+
+        if (!lines?.has(line.name)) {
+          lines.set(line.name, {
+            directions: new Map([
+              [DIRECTIONS.Enum.H, []],
+              [DIRECTIONS.Enum.R, []],
+            ]),
+            type: line.type,
+          });
+        }
+
+        const directions = lines.get(line.name)?.directions;
+
+        directions?.get(line.direction)?.push({
+          towards: unifyTowardsSpelling(
+            departure.vehicle?.towards ?? line.towards
+          ),
+          countdown: departure.departureTime.countdown,
+          barrierFree: departure.vehicle?.barrierFree ?? line.barrierFree,
+        });
       });
-    }
+    });
   });
 
-  return departures;
+  try {
+    return DeparturesSchema.parse(departures);
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+};
+
+const unifyTowardsSpelling = (towards: string): string => {
+  const replacements = new Map([
+    ["ASPERNSTRASSE", "Aspernstraße"],
+    ["SEESTADT", "Seestadt"],
+    ["SCHOTTENTOR", "Schottentor"],
+    ["ALAUDAGASSE", "Alaudagasse"],
+    ["LEOPOLDAU", "Leopoldau"],
+    ["HEILIGENSTADT", "Heiligenstadt"],
+    ["HÜTTELDORF", "Hütteldorf S U"],
+    ["OBERLAA", "Oberlaa"],
+  ]);
+
+  const regex = new RegExp(Array.from(replacements.keys()).join("|"), "gi");
+
+  return towards.replace(
+    regex,
+    (matched) => replacements.get(matched) ?? matched
+  );
 };
 
 // class MonitorSingleton extends AbstractSingleton {}
