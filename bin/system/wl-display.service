@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=display
+User=vincentehl
 ExecStart=/home/vincentehl/wl-display/bin/launch-server.sh
 WorkingDirectory=/home/vincentehl/wl-display/
 Restart=no

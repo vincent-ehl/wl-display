@@ -2,5 +2,6 @@
 Encoding=UTF-8
 Version=1.0
 Type=Application
-Exec=chromium-browser http://localhost:3000 --start-fullscreen
+Exec=/home/vincentehl/wl-display/bin/launch-browser.sh
+Terminal=true
 Name=WL-Display-Kiosk

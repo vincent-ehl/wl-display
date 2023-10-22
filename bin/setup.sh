@@ -10,8 +10,13 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-ln -s /home/vincentehl/wl-display/bin/system/wl-display.service /lib/systemd/system/wl-display.service
+HOME_DIR=/home/vincentehl
 
-systemctl daemon-reload
+mkdir -p $HOME_DIR/.config/systemd/user
+ln -s $HOME_DIR//wl-display/bin/system/wl-display.service $HOME_DIR/.config/systemd/user/wl-display.service
+mkdir -p $HOME_DIR/.config/autostart
+ln -s $HOME_DIR//wl-display/bin/system/wl-display-kiosk.desktop $HOME_DIR/.config/autostart
 
-systemctl enable wl-display && systemctl start wl-display
+systemctl --user daemon-reload
+
+systemctl --user enable wl-display && systemctl --user start wl-display
