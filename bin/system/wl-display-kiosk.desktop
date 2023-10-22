@@ -1,0 +1,6 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Exec=chromium-browser http://localhost:3000 --start-fullscreen
+Name=WL-Display-Kiosk

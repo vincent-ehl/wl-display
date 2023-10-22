@@ -1,0 +1,13 @@
+[Unit]
+Description=wl-display
+After=network.target
+
+[Service]
+Type=simple
+User=display
+ExecStart=/home/vincentehl/wl-display/bin/launch-server.sh
+WorkingDirectory=/home/vincentehl/wl-display/
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
