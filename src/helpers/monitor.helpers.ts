@@ -1,6 +1,4 @@
-// import { AbstractSingleton } from "./abstract.singleton";
 import { z } from "zod";
-import { dummyResponse } from "@/global";
 
 const DIRECTIONS = z.enum(["H", "R"]);
 
@@ -8,7 +6,7 @@ export const VEHICLE_TYPES = z.enum(["ptTram", "ptBusCity", "ptMetro"]);
 
 export type VEHICLE_TYPES = z.infer<typeof VEHICLE_TYPES>;
 
-const MonitorResponseSchema = z.object({
+export const MonitorResponseSchema = z.object({
   data: z.object({
     monitors: z.array(
       z.object({
@@ -28,6 +26,8 @@ const MonitorResponseSchema = z.object({
                 .object({
                   departureTime: z.object({
                     countdown: z.number(),
+                    timeReal: z.string().optional(),
+                    timePlanned: z.string(),
                   }),
                   vehicle: z
                     .object({
@@ -53,30 +53,11 @@ const MonitorResponseSchema = z.object({
 
 export type MonitorResponse = z.infer<typeof MonitorResponseSchema>;
 
-/**
- * Get Monitor data as returned by the Wiener Linien API
- *
- * @returns Promise<MonitorResponse | undefined>
- */
-export const getMonitors = (): Promise<MonitorResponse | undefined> => {
-  return new Promise<MonitorResponse>((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        const response = MonitorResponseSchema.parse(dummyResponse);
-
-        resolve(response);
-      } catch (error) {
-        console.error(error);
-
-        reject(error);
-      }
-    }, 300);
-  });
-};
-
 const DepartureSchema = z.object({
   towards: z.string(),
   countdown: z.number(),
+  timeReal: z.string().optional(),
+  timePlanned: z.string(),
   barrierFree: z.boolean(),
 });
 
@@ -135,6 +116,8 @@ export const transformMonitorToDepartures = async (
             departure.vehicle?.towards ?? line.towards
           ),
           countdown: departure.departureTime.countdown,
+          timeReal: departure.departureTime?.timeReal,
+          timePlanned: departure.departureTime?.timePlanned,
           barrierFree: departure.vehicle?.barrierFree ?? line.barrierFree,
         });
       });
@@ -168,7 +151,3 @@ const unifyTowardsSpelling = (towards: string): string => {
     (matched) => replacements.get(matched) ?? matched
   );
 };
-
-// class MonitorSingleton extends AbstractSingleton {}
-
-// export const monitorSingleton = new MonitorSingleton();

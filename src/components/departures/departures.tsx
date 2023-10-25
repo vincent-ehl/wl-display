@@ -1,35 +1,16 @@
-import {
-  Departures,
-  MonitorResponse,
-  getMonitors,
-  transformMonitorToDepartures,
-  VEHICLE_TYPES,
-} from "@/singletons/monitor.singleton";
+import { departureTimeToMinutes } from "@/helpers/departures.helpers";
+import { Departures, VEHICLE_TYPES } from "@/helpers/monitor.helpers";
 
 interface DeparturesProps {
+  departures: Departures | undefined;
   diva: string;
   types: VEHICLE_TYPES[];
   lineNames?: string[];
+  now: number;
 }
 
-export const DeparturesView = async (
-  props: DeparturesProps
-): Promise<JSX.Element> => {
-  let monitors: MonitorResponse | undefined;
-
-  try {
-    monitors = await getMonitors();
-  } catch (error) {
-    console.error(error);
-  }
-
-  let departures: Departures | undefined;
-
-  if (monitors) {
-    departures = await transformMonitorToDepartures(monitors);
-  }
-
-  const departure = departures?.get(props.diva);
+export const DeparturesView = (props: DeparturesProps): JSX.Element => {
+  const departure = props.departures?.get(props.diva);
 
   if (departure) {
     let lines = Array.from(departure.lines);
@@ -39,6 +20,18 @@ export const DeparturesView = async (
     if (props.lineNames?.length) {
       lines = lines.filter((line) => props.lineNames?.includes(line[0]));
     }
+
+    departure.lines.forEach((line) => {
+      line.directions.forEach((directions) => {
+        directions = directions.filter((direction) => {
+          const keepDate =
+            new Date(direction?.timeReal || direction?.timePlanned).getTime() >
+            props.now;
+
+          return keepDate;
+        });
+      });
+    });
 
     return (
       <div className="overflow-hidden">
@@ -73,6 +66,10 @@ export const DeparturesView = async (
                         {/* <p>{"->" + availableDirections}</p> */}
                         <div className="bg-black text-white">
                           {limitedDepartures.map((departure, index) => {
+                            const countdown = departureTimeToMinutes(
+                              departure.timeReal ?? departure.timePlanned
+                            );
+
                             return (
                               <div
                                 key={index}
@@ -88,7 +85,7 @@ export const DeparturesView = async (
                                   {departure.towards}
                                 </div>
                                 <div className="col-span-2">
-                                  {departure.countdown}
+                                  {countdown ?? departure.countdown + "Fake"}
                                 </div>
                               </div>
                             );
