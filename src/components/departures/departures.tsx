@@ -36,6 +36,7 @@ export const DeparturesView = (props: DeparturesProps): JSX.Element => {
       lines = lines.filter((line) => props.lineNames?.includes(line[0]));
     }
 
+    // Hide lines that have already passed the stop
     departure.lines.forEach((line) => {
       line.directions.forEach((directions) => {
         directions = directions.filter((direction) => {
@@ -47,6 +48,12 @@ export const DeparturesView = (props: DeparturesProps): JSX.Element => {
         });
       });
     });
+
+    // Sometime the "1" shows up in Taborstraße
+    // IDK why, maybe sometimes it takes this route to the "Betriebsbahnhof"
+    if (props.diva === "60201891") {
+      departure.lines.delete("1");
+    }
 
     return (
       <div className="overflow-hidden text-black-font">
