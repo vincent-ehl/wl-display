@@ -142,6 +142,7 @@ const unifyTowardsSpelling = (towards: string): string => {
     ["HEILIGENSTADT", "Heiligenstadt"],
     ["HÜTTELDORF", "Hütteldorf S U"],
     ["OBERLAA", "Oberlaa"],
+    ["SCHWEDENPLATZ", "Schwedenplatz"],
   ]);
 
   const regex = new RegExp(Array.from(replacements.keys()).join("|"), "gi");

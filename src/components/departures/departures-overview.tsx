@@ -69,8 +69,8 @@ export const DeparturesOverviewView = (): JSX.Element => {
   }, []);
 
   return (
-    <div className="p-5 grid grid-cols-2 gap-2">
-      <div className="border-4 border-u1-red col-span-2">
+    <div className="grid grid-cols-2 grid-rows-3 gap-4">
+      <div className="border-0 rounded shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] bg-white p-2 border-u1-red col-span-2">
         <DeparturesView
           now={now}
           departures={departures}
@@ -78,7 +78,7 @@ export const DeparturesOverviewView = (): JSX.Element => {
           types={[VEHICLE_TYPES.Enum.ptMetro, VEHICLE_TYPES.Enum.ptTram]}
         />
       </div>
-      <div className="border-4 border-u2-purple">
+      <div className="border-0 rounded shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] bg-white p-2 border-u2-purple">
         <DeparturesView
           now={now}
           departures={departures}
@@ -86,7 +86,18 @@ export const DeparturesOverviewView = (): JSX.Element => {
           types={[VEHICLE_TYPES.Enum.ptMetro, VEHICLE_TYPES.Enum.ptTram]}
         />
       </div>
-      <div className="border-4 border-u4-green">
+      <div className="row-span-2">
+        <div className="relative overflow-hidden h-64">
+          <img
+            className="absolute left-0 right-0 mx-auto w-64 -top-[15%]"
+            src="/assets/img/sleeping-cat.gif"
+          />
+        </div>
+        <div className="flex justify-end">
+          <img src="/assets/img/wl-logo.png" />
+        </div>
+      </div>
+      <div className="border-0 rounded shadow-[rgba(0,_0,_0,_0.24)_0px_3px_8px] bg-white p-2 border-u4-green">
         <DeparturesView
           now={now}
           departures={departures}

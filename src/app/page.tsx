@@ -3,7 +3,9 @@ import { DeparturesOverviewView } from "@/components/departures/departures-overv
 const Home = (): JSX.Element => {
   return (
     <main>
-      <DeparturesOverviewView></DeparturesOverviewView>
+      <div className="flex flex-col gap-5 p-5">
+        <DeparturesOverviewView />
+      </div>
     </main>
   );
 };
